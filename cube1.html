@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="description" content="[add your bin description]">
+  <meta charset="utf-8">
+  <title>TWGL Cube</title>
+  <canvas id="myCanvas"
+	   width="600" height="600"
+	   style="border:1px solid #000;">
+  </canvas><br/>
+  <input id="slider1" type="range" min="-100" max="100" /><br/>
+  <input id="slider2" type="range" min="-100" max="100" /><br/>
+  <input id="slider3" type="range" min="-100" max="100" /><br/>
+  <input id="slider4" type="range" min="-100" max="100" />
+
+  <script src="http://graphics.cs.wisc.edu/JS/twgl-full.min.js"></script>
+  <script>
+    function setup() { "use strict";
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      var m4 = twgl.m4;
+
+      var slider1 = document.getElementById('slider1');
+      slider1.value = 0;
+      var slider2 = document.getElementById('slider2');
+      slider2.value = 0;
+      var slider3 = document.getElementById('slider3');
+      slider3.value = 0;
+      var slider4 = document.getElementById('slider4');
+      slider4.value = 0;
+
+      function moveToTx(x,y,z,Tx) {
+        var loc = [x,y,z];
+        var locTx = m4.transformPoint(Tx,loc);
+        context.moveTo(locTx[0],locTx[1]);
+      }
+
+      function lineToTx(x,y,z,Tx) {
+        var loc = [x,y,z];
+        var locTx = m4.transformPoint(Tx,loc);
+        context.lineTo(locTx[0],locTx[1]);
+      }
+
+      function drawAxes(Tx) {
+        context.beginPath();
+        moveToTx(0,0,0,Tx);lineToTx(100,0,0,Tx);context.stroke();
+        moveToTx(0,0,0,Tx);lineToTx(0,150,0,Tx);context.stroke();
+        moveToTx(0,0,0,Tx);lineToTx(0,0,200,Tx);context.stroke();
+      }
+
+      function drawAxes_1(Tx) {
+        context.beginPath();
+        moveToTx(0,0,0,Tx);lineToTx(100,0,0,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(0,0,0,Tx);lineToTx(0,150,0,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(0,0,0,Tx);lineToTx(0,0,200,Tx);context.strokeStyle="red";context.stroke();
+      }
+
+      function drawCube(Tx) {
+        context.beginPath();
+        moveToTx(180,200,100,Tx);lineToTx(220,200,100,Tx);context.stroke();
+        moveToTx(200,180,100,Tx);lineToTx(200,220,100,Tx);context.stroke();
+
+        moveToTx(100,100,100,Tx);lineToTx(300,100,100,Tx);
+        lineToTx(300,300,100,Tx);lineToTx(100,300,100,Tx);context.stroke();
+        moveToTx(300,100,100,Tx);lineToTx(300,100,300,Tx);
+        lineToTx(300,300,300,Tx);lineToTx(300,300,100,Tx);context.stroke();
+        moveToTx(300,100,300,Tx);lineToTx(100,100,300,Tx);
+        lineToTx(100,300,300,Tx);lineToTx(300,300,300,Tx);context.stroke();
+        moveToTx(100,100,300,Tx);lineToTx(100,100,100,Tx);
+        lineToTx(100,300,100,Tx);lineToTx(100,300,300,Tx);context.stroke();
+      }
+
+      function drawCube_1(Tx) {
+        context.beginPath();
+        moveToTx(140,150,100,Tx);lineToTx(160,150,100,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(150,140,100,Tx);lineToTx(150,160,100,Tx);context.strokeStyle="red";context.stroke();
+
+        moveToTx(100,100,100,Tx);lineToTx(200,100,100,Tx);
+        lineToTx(200,200,100,Tx);lineToTx(100,200,100,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(200,100,100,Tx);lineToTx(200,100,200,Tx);
+        lineToTx(200,200,200,Tx);lineToTx(200,200,100,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(200,100,200,Tx);lineToTx(100,100,200,Tx);
+        lineToTx(100,200,200,Tx);lineToTx(200,200,200,Tx);context.strokeStyle="red";context.stroke();
+        moveToTx(100,100,200,Tx);lineToTx(100,100,100,Tx);
+        lineToTx(100,200,100,Tx);lineToTx(100,200,200,Tx);context.strokeStyle="red";context.stroke();
+      }
+
+      function draw() {
+        canvas.width = canvas.width;
+
+        var angle1 = slider1.value*0.01*Math.PI;
+        var angle2 = slider2.value*0.01*Math.PI;
+        var angle3 = slider3.value*0.01*Math.PI;
+        var angle4 = slider4.value*0.01*Math.PI;
+        var axis = [1,1,1];
+
+        var Tmodel=m4.axisRotation(axis,angle2);
+        var Tmodel_1=m4.axisRotation(axis,angle4);
+
+        var eye=[700*Math.cos(angle1),400,700*Math.sin(angle1)];
+        var eye_1=[700*Math.cos(angle3),400,700*Math.sin(angle3)];
+        var target=[0,0,0];
+        var up=[0,1,0];
+        var Tcamera=m4.inverse(m4.lookAt(eye,target,up));
+        var Tcamera_1=m4.inverse(m4.lookAt(eye_1,target,up));
+
+        var Tprojection=m4.perspective(Math.PI/3,1,5,400);
+
+        var Tviewport=m4.multiply(m4.scaling([200,-200,200]),m4.translation([300,300,0]));
+
+        var Tcpv=m4.multiply(m4.multiply(Tcamera,Tprojection),Tviewport);
+        var Tmcpv=m4.multiply(Tmodel,Tcpv);
+
+        var Tcpv_1=m4.multiply(m4.multiply(Tcamera_1,Tprojection),Tviewport);
+        var Tmcpv_1=m4.multiply(Tmodel_1,Tcpv_1);
+
+        drawCube(Tmcpv);
+        drawAxes(Tcpv);
+        drawCube_1(Tmcpv_1);
+        drawAxes_1(Tcpv_1);
+      }
+
+      slider1.addEventListener("input",draw);
+      slider2.addEventListener("input",draw);
+      slider3.addEventListener("input",draw);
+      slider4.addEventListener("input",draw);
+      draw();
+
+    }
+    window.onload = setup;
+
+  </script>
+</head>
+<body>
+
+</body>
+</html>
